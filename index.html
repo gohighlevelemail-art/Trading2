@@ -16,6 +16,9 @@
       --success: #22c55e;
       --border: #1f2933;
       --input: #0b111c;
+      --green: #22c55e;
+      --yellow: #fbbf24;
+      --red: #f97373;
     }
 
     * {
@@ -58,7 +61,14 @@
     .title-block {
       display: flex;
       flex-direction: column;
-      gap: 2px;
+      gap: 4px;
+    }
+
+    .title-line {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
     }
 
     .title {
@@ -71,6 +81,44 @@
       color: var(--muted);
     }
 
+    .portfolio-block {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+    }
+
+    .portfolio-label {
+      color: var(--muted);
+    }
+
+    .portfolio-input {
+      min-width: 120px;
+      padding: 6px 9px;
+      border-radius: 8px;
+      border: 1px solid #1f2937;
+      background: var(--input);
+      color: var(--text);
+      font-size: 14px;
+      outline: none;
+    }
+
+    .portfolio-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.45);
+    }
+
+    .margin-text {
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    .margin-value {
+      color: var(--text);
+      font-weight: 500;
+      margin-left: 4px;
+    }
+
     .clock-block {
       display: flex;
       flex-direction: column;
@@ -79,7 +127,7 @@
     }
 
     .clock-line {
-      font-size: 14px;
+      font-size: 12px;
       font-weight: 500;
     }
 
@@ -385,7 +433,8 @@
     }
 
     .btn-primary:hover {
-      filter: brightness(1.05);
+      background: radial-gradient(circle at top left, #16a34a, #15803d);
+      box-shadow: 0 6px 16px rgba(22, 163, 74, 0.65);
       transform: translateY(-1px);
     }
 
@@ -396,8 +445,9 @@
     }
 
     .btn-ghost:hover {
-      border-color: rgba(148, 163, 184, 1);
-      color: #e5e7eb;
+      border-color: rgba(239, 68, 68, 0.9);
+      color: #fecaca;
+      background: rgba(127, 29, 29, 0.4);
       transform: translateY(-1px);
     }
 
@@ -411,24 +461,127 @@
       color: #e5e7eb;
     }
 
-    .risk-grid {
+    .risk-layout {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 12px 18px;
+      grid-template-columns: minmax(0, 1.3fr) minmax(0, 1.7fr);
+      gap: 20px;
+    }
+
+    .gauge-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .gauge-label {
       font-size: 13px;
-    }
-
-    .risk-item-label {
-      font-size: 11px;
       color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
     }
 
-    .risk-item-value {
-      margin-top: 2px;
+    .gauge-status {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .gauge-status.green {
+      color: var(--green);
+    }
+
+    .gauge-status.yellow {
+      color: var(--yellow);
+    }
+
+    .gauge-status.red {
+      color: var(--red);
+    }
+
+    .gauge-description {
+      font-size: 12px;
+      color: var(--muted);
+      text-align: center;
+      max-width: 260px;
+    }
+
+    .targets-card {
+      font-size: 12px;
+    }
+
+    .targets-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 8px;
+      font-size: 12px;
+    }
+
+    .targets-table th,
+    .targets-table td {
+      padding: 4px 6px;
+      border-bottom: 1px solid #111827;
+    }
+
+    .targets-table th {
+      text-align: left;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .targets-table td {
       color: #e5e7eb;
-      font-variant-numeric: tabular-nums;
+    }
+
+    .targets-profit-bad {
+      color: var(--red);
+    }
+
+    .targets-profit-good {
+      color: var(--green);
+    }
+
+    .risk-meta-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      font-size: 12px;
+      margin-bottom: 6px;
+      flex-wrap: wrap;
+    }
+
+    .risk-meta-item span {
+      color: var(--muted);
+    }
+
+    .saved-table-wrapper {
+      max-height: 320px;
+      overflow-y: auto;
+      font-size: 12px;
+    }
+
+    .saved-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .saved-table th,
+    .saved-table td {
+      padding: 4px 6px;
+      border-bottom: 1px solid #111827;
+    }
+
+    .saved-table th {
+      text-align: left;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .saved-table td {
+      color: #e5e7eb;
+    }
+
+    @media (max-width: 900px) {
+      .risk-layout {
+        grid-template-columns: 1fr;
+      }
     }
 
     @media (max-width: 768px) {
@@ -441,8 +594,7 @@
       .clock-block {
         align-items: flex-start;
       }
-      .grid-2,
-      .risk-grid {
+      .grid-2 {
         grid-template-columns: 1fr;
       }
       .tabs {
@@ -458,7 +610,22 @@
   <div class="app-container">
     <div class="header-row">
       <div class="title-block">
-        <div class="title">Trading Control Center</div>
+        <div class="title-line">
+          <div class="title">Trading Control Center</div>
+          <div class="portfolio-block">
+            <span class="portfolio-label">Portfolio:</span>
+            <input
+              id="portfolioInput"
+              class="portfolio-input"
+              type="text"
+              placeholder="Enter value"
+            />
+            <span class="margin-text">
+              Margin Amount:
+              <span id="marginAmount" class="margin-value">$0.00</span>
+            </span>
+          </div>
+        </div>
         <div class="subtitle">
           Fee Structure &amp; Risk Log &bull; TradeZero-style fee model
         </div>
@@ -479,6 +646,10 @@
       <button class="tab-button" data-tab="risk">
         <span class="tab-icon">🛡️</span>
         Risk Management
+      </button>
+      <button class="tab-button" data-tab="saved">
+        <span class="tab-icon">💾</span>
+        Saved Trades
       </button>
     </div>
 
@@ -630,14 +801,11 @@
           </div>
 
           <div class="actions-row">
-            <button class="btn btn-ghost" id="clearButton">
-              ✖ Clear
+            <button class="btn btn-primary" id="executeButton">
+              ✅ Execute Trade
             </button>
-            <button class="btn btn-primary" id="logTradeButton">
-              💾 Save Trade (browser)
-            </button>
-            <button class="btn btn-ghost" id="exportCsvButton">
-              ⬇ Export CSV
+            <button class="btn btn-ghost" id="cancelButton">
+              ✖ Cancel Trade
             </button>
           </div>
         </div>
@@ -647,86 +815,185 @@
       <div class="tab-panel" id="tab-risk">
         <div class="card">
           <div class="card-title-row">
-            <div class="card-title">Risk Management Snapshot</div>
+            <div class="card-title">Risk Management</div>
             <div class="card-note">
-              Mirrors current Fee Structure inputs &amp; fee totals for future
-              risk work.
+              Uses current order, fees, and margin amount to estimate position risk.
             </div>
           </div>
 
-          <div class="risk-grid">
-            <div>
-              <div class="risk-item-label">Symbol</div>
-              <div class="risk-item-value" id="riskSymbol">--</div>
-            </div>
-            <div>
-              <div class="risk-item-label">Side</div>
-              <div class="risk-item-value" id="riskSide">--</div>
-            </div>
-            <div>
-              <div class="risk-item-label">Order Type</div>
-              <div class="risk-item-value" id="riskOrderType">--</div>
-            </div>
-            <div>
-              <div class="risk-item-label">Trade Price</div>
-              <div class="risk-item-value" id="riskTradePrice">$0.00</div>
-            </div>
-            <div>
-              <div class="risk-item-label">Shares</div>
-              <div class="risk-item-value" id="riskShares">0</div>
-            </div>
-            <div>
-              <div class="risk-item-label">Locate Fee</div>
-              <div class="risk-item-value" id="riskLocate">$0.00</div>
-            </div>
-            <div>
-              <div class="risk-item-label">Total Fees</div>
-              <div class="risk-item-value" id="riskTotalFees">$0.00</div>
-            </div>
-            <div>
-              <div class="risk-item-label">Net Amount</div>
-              <div class="risk-item-value" id="riskNetAmount">$0.00</div>
-            </div>
-            <div>
-              <div class="risk-item-label">ZeroFree</div>
-              <div class="risk-item-value" id="riskZeroFree">--</div>
-            </div>
-            <div>
-              <div class="risk-item-label">Market Status</div>
-              <div class="risk-item-value" id="riskMarketStatus">--</div>
-            </div>
-          </div>
+          <div class="risk-layout">
+            <div class="gauge-container">
+              <svg
+                id="riskGauge"
+                width="220"
+                height="220"
+                viewBox="0 0 220 220"
+              >
+                <!-- Background circle -->
+                <circle
+                  cx="110"
+                  cy="110"
+                  r="80"
+                  fill="none"
+                  stroke="#0b1120"
+                  stroke-width="24"
+                ></circle>
 
-          <div class="status-text" style="margin-top: 14px;">
-            This tab is currently informational only. Future additions can
-            include stop levels, % risk, and R-multiple targets.
+                <!-- Green arc 0–34% -->
+                <circle
+                  cx="110"
+                  cy="110"
+                  r="80"
+                  fill="none"
+                  stroke="#22c55e"
+                  stroke-width="24"
+                  stroke-linecap="round"
+                  stroke-dasharray="0 999"
+                  transform="rotate(-90 110 110)"
+                  id="arcGreen"
+                ></circle>
+
+                <!-- Yellow arc 35–66% -->
+                <circle
+                  cx="110"
+                  cy="110"
+                  r="80"
+                  fill="none"
+                  stroke="#fbbf24"
+                  stroke-width="24"
+                  stroke-linecap="round"
+                  stroke-dasharray="0 999"
+                  transform="rotate(-90 110 110)"
+                  id="arcYellow"
+                ></circle>
+
+                <!-- Red arc 67–100% -->
+                <circle
+                  cx="110"
+                  cy="110"
+                  r="80"
+                  fill="none"
+                  stroke="#f97373"
+                  stroke-width="24"
+                  stroke-linecap="round"
+                  stroke-dasharray="0 999"
+                  transform="rotate(-90 110 110)"
+                  id="arcRed"
+                ></circle>
+
+                <!-- Inner hole -->
+                <circle
+                  cx="110"
+                  cy="110"
+                  r="56"
+                  fill="#020617"
+                ></circle>
+
+                <!-- Needle -->
+                <line
+                  id="gaugeNeedle"
+                  x1="110"
+                  y1="110"
+                  x2="110"
+                  y2="34"
+                  stroke="#e5e7eb"
+                  stroke-width="3"
+                  stroke-linecap="round"
+                  transform="rotate(0 110 110)"
+                ></line>
+
+                <!-- Center dot -->
+                <circle cx="110" cy="110" r="4" fill="#e5e7eb"></circle>
+
+                <!-- Percentage text -->
+                <text
+                  id="gaugePercentText"
+                  x="110"
+                  y="116"
+                  text-anchor="middle"
+                  fill="#e5e7eb"
+                  font-size="16"
+                  font-weight="600"
+                >
+                  0%
+                </text>
+              </svg>
+
+              <div class="gauge-label">
+                Risk usage based on Net Amount vs Margin Amount.
+              </div>
+              <div id="gaugeStatusText" class="gauge-status green">
+                Acceptable / Controlled Risk
+              </div>
+              <div id="gaugeDescription" class="gauge-description">
+                Enter portfolio value and an order to see how much of your
+                available margin this position would consume.
+              </div>
+            </div>
+
+            <div class="targets-card">
+              <div class="risk-meta-row">
+                <div class="risk-meta-item">
+                  <span>Margin Portfolio:</span>
+                  <strong id="riskMargin">$0.00</strong>
+                </div>
+                <div class="risk-meta-item">
+                  <span>Risked Amount (Net):</span>
+                  <strong id="riskNetUsed">$0.00</strong>
+                </div>
+                <div class="risk-meta-item">
+                  <span>Side:</span>
+                  <strong id="riskSideLabel">--</strong>
+                </div>
+              </div>
+
+              <div class="card-note" style="margin-bottom: 4px;">
+                Profit Targets (per-position move in your favour, after accounting for fees).
+              </div>
+
+              <table class="targets-table">
+                <thead>
+                  <tr>
+                    <th>Percent Range</th>
+                    <th>Dollar Range</th>
+                  </tr>
+                </thead>
+                <tbody id="targetsBody">
+                  <!-- Rows injected by JS -->
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
+      </div>
 
-        <div class="card" style="margin-top: 16px;">
+      <!-- SAVED TRADES TAB -->
+      <div class="tab-panel" id="tab-saved">
+        <div class="card">
           <div class="card-title-row">
             <div class="card-title">Saved Trades (Browser Log)</div>
             <div class="card-note">
               Stored in your browser via localStorage. Clear browser data =
-              log lost. Export CSV for backups.
+              log lost. Use this tab as a quick journal of executed trades.
             </div>
           </div>
 
-          <div style="max-height: 260px; overflow-y: auto; font-size: 12px;">
-            <table style="width: 100%; border-collapse: collapse;">
+          <div class="saved-table-wrapper">
+            <table class="saved-table">
               <thead>
                 <tr>
-                  <th style="text-align:left; padding:4px 6px; border-bottom:1px solid #1f2937;">Date</th>
-                  <th style="text-align:left; padding:4px 6px; border-bottom:1px solid #1f2937;">Time</th>
-                  <th style="text-align:left; padding:4px 6px; border-bottom:1px solid #1f2937;">Symbol</th>
-                  <th style="text-align:left; padding:4px 6px; border-bottom:1px solid #1f2937;">Side</th>
-                  <th style="text-align:right; padding:4px 6px; border-bottom:1px solid #1f2937;">Px</th>
-                  <th style="text-align:right; padding:4px 6px; border-bottom:1px solid #1f2937;">Shares</th>
-                  <th style="text-align:right; padding:4px 6px; border-bottom:1px solid #1f2937;">Fees</th>
-                  <th style="text-align:right; padding:4px 6px; border-bottom:1px solid #1f2937;">Net</th>
+                  <th>Date</th>
+                  <th>Time</th>
+                  <th>Symbol</th>
+                  <th>Side</th>
+                  <th>Type</th>
+                  <th style="text-align:right;">Px</th>
+                  <th style="text-align:right;">Shares</th>
+                  <th style="text-align:right;">Fees</th>
+                  <th style="text-align:right;">Net</th>
                 </tr>
               </thead>
-              <tbody id="tradeLogBody">
+              <tbody id="savedBody">
                 <!-- Rows injected by JS -->
               </tbody>
             </table>
@@ -741,6 +1008,11 @@
     function formatMoney(value) {
       if (!isFinite(value)) return "$0.00";
       return "$" + value.toFixed(2);
+    }
+
+    function parseMoney(text) {
+      if (!text) return 0;
+      return parseFloat(String(text).replace(/[^0-9.-]/g, "")) || 0;
     }
 
     function toEstDate(date) {
@@ -778,7 +1050,68 @@
       return { status: "Market Closed", class: "status-closed" };
     }
 
-    // ---------- CLOCK ----------
+    function getCurrentLeverage(estDate, portfolioValue) {
+      if (portfolioValue < 500) {
+        return 1;
+      }
+      const hours = estDate.getHours();
+      const minutes = estDate.getMinutes();
+      const totalMinutes = hours * 60 + minutes;
+
+      const intradayStart = 4 * 60;
+      const intradayEnd = 16 * 60;
+      const afterStart = 16 * 60;
+      const afterEnd = 20 * 60;
+
+      if (totalMinutes >= intradayStart && totalMinutes < intradayEnd) {
+        return 3;
+      }
+      if (totalMinutes >= afterStart && totalMinutes < afterEnd) {
+        return 2;
+      }
+      // overnight window
+      return 2;
+    }
+
+    function formatDateTimeForLog() {
+      const now = new Date();
+      const est = toEstDate(now);
+      const status = getMarketStatus(est);
+
+      const month = String(est.getMonth() + 1).padStart(2, "0");
+      const day = String(est.getDate()).padStart(2, "0");
+      const year = est.getFullYear();
+
+      let hours = est.getHours();
+      const minutes = String(est.getMinutes()).padStart(2, "0");
+      const ampm = hours >= 12 ? "PM" : "AM";
+      let displayHour = hours % 12;
+      if (displayHour === 0) displayHour = 12;
+
+      const dateStr = month + "/" + day + "/" + year;
+      const timeStr = displayHour + ":" + minutes + " " + ampm;
+
+      return { dateStr, timeStr, marketStatus: status.status, est, status };
+    }
+
+    // ---------- CLOCK + PORTFOLIO MARGIN ----------
+    const clockDisplay = document.getElementById("clockDisplay");
+    const marketStatusPill = document.getElementById("marketStatusPill");
+    const marketStatusText = document.getElementById("marketStatusText");
+    const riskMarketStatus = document.getElementById("riskMarketStatus"); // may be null
+    const marginAmountEl = document.getElementById("marginAmount");
+    const portfolioInput = document.getElementById("portfolioInput");
+
+    let portfolioValue = 0;
+
+    function updateMargin(est) {
+      const lev = getCurrentLeverage(est, portfolioValue);
+      const marginValue = portfolioValue * lev;
+      marginAmountEl.textContent = formatMoney(marginValue);
+      document.getElementById("riskMargin").textContent = formatMoney(marginValue);
+      updateRiskGauge(); // recalc with new margin
+    }
+
     function updateClock() {
       const now = new Date();
       const est = toEstDate(now);
@@ -786,35 +1119,52 @@
       const month = String(est.getMonth() + 1).padStart(2, "0");
       const day = String(est.getDate()).padStart(2, "0");
       const year = est.getFullYear();
-
       let hours = est.getHours();
       let minutes = String(est.getMinutes()).padStart(2, "0");
       let ampm = hours >= 12 ? "PM" : "AM";
       let displayHour = hours % 12;
       if (displayHour === 0) displayHour = 12;
 
-      const clockDisplay = document.getElementById("clockDisplay");
       clockDisplay.textContent =
         month + "/" + day + "/" + year + " " + displayHour + ":" + minutes + " " + ampm + " EST";
 
       const status = getMarketStatus(est);
-      const pill = document.getElementById("marketStatusPill");
-      const text = document.getElementById("marketStatusText");
+      marketStatusPill.className = "status-pill " + status.class;
+      marketStatusText.textContent = status.status;
 
-      pill.className = "status-pill " + status.class;
-      text.textContent = status.status;
-
-      document.getElementById("riskMarketStatus").textContent = status.status;
+      updateMargin(est);
     }
 
     setInterval(updateClock, 1000);
     updateClock();
 
-    // ---------- TAB SWITCHING ----------
+    portfolioInput.addEventListener("focus", () => {
+      portfolioInput.value = portfolioValue ? String(portfolioValue) : "";
+    });
+
+    function commitPortfolio() {
+      const raw = parseFloat(portfolioInput.value.replace(/,/g, "")) || 0;
+      portfolioValue = raw > 0 ? raw : 0;
+      portfolioInput.value = portfolioValue ? formatMoney(portfolioValue) : "";
+      const now = new Date();
+      updateMargin(toEstDate(now));
+    }
+
+    portfolioInput.addEventListener("blur", commitPortfolio);
+    portfolioInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        commitPortfolio();
+        portfolioInput.blur();
+      }
+    });
+
+    // ---------- TABS ----------
     const tabButtons = document.querySelectorAll(".tab-button");
     const tabPanels = {
       fees: document.getElementById("tab-fees"),
       risk: document.getElementById("tab-risk"),
+      saved: document.getElementById("tab-saved"),
     };
 
     tabButtons.forEach((btn) => {
@@ -850,23 +1200,29 @@
     const netAmount = document.getElementById("netAmount");
     const statusMessage = document.getElementById("statusMessage");
 
-    const clearButton = document.getElementById("clearButton");
-    const logTradeButton = document.getElementById("logTradeButton");
-    const exportCsvButton = document.getElementById("exportCsvButton");
+    const executeButton = document.getElementById("executeButton");
+    const cancelButton = document.getElementById("cancelButton");
 
-    const riskSymbol = document.getElementById("riskSymbol");
-    const riskSide = document.getElementById("riskSide");
-    const riskOrderType = document.getElementById("riskOrderType");
-    const riskTradePrice = document.getElementById("riskTradePrice");
-    const riskShares = document.getElementById("riskShares");
-    const riskLocate = document.getElementById("riskLocate");
-    const riskTotalFees = document.getElementById("riskTotalFees");
-    const riskNetAmount = document.getElementById("riskNetAmount");
-    const riskZeroFree = document.getElementById("riskZeroFree");
+    const riskMarginEl = document.getElementById("riskMargin");
+    const riskNetUsedEl = document.getElementById("riskNetUsed");
+    const riskSideLabel = document.getElementById("riskSideLabel");
+    const targetsBody = document.getElementById("targetsBody");
 
-    const tradeLogBody = document.getElementById("tradeLogBody");
+    const savedBody = document.getElementById("savedBody");
 
-    // ---------- LOGIC ----------
+    // Gauge elements
+    const arcGreen = document.getElementById("arcGreen");
+    const arcYellow = document.getElementById("arcYellow");
+    const arcRed = document.getElementById("arcRed");
+    const gaugeNeedle = document.getElementById("gaugeNeedle");
+    const gaugePercentText = document.getElementById("gaugePercentText");
+    const gaugeStatusText = document.getElementById("gaugeStatusText");
+    const gaugeDescription = document.getElementById("gaugeDescription");
+
+    const radius = 80;
+    const circumference = 2 * Math.PI * radius;
+
+    // ---------- FEE / ORDER LOGIC ----------
     function updateLocateVisibility() {
       if (sideSelect.value === "short") {
         locateField.classList.remove("locate-hidden");
@@ -917,26 +1273,12 @@
         summaryBadge.textContent = "Waiting for input";
         statusMessage.textContent =
           "Enter a positive trade price and share size to evaluate ZeroFree status and fees.";
-        mirrorToRisk({
-          symbol,
-          side,
-          orderType,
-          price,
-          shares,
-          locate,
-          totalFees: locate,
-          net: notional + locate,
-          zeroFree: "--",
-        });
+        updateRiskSection(notional, locate, 0, 0, side);
         return;
       }
 
       let isZeroFree = false;
-      if (
-        orderType === "limit" &&
-        shares >= 200 &&
-        price >= 1
-      ) {
+      if (orderType === "limit" && shares >= 200 && price >= 1) {
         isZeroFree = true;
       }
 
@@ -985,36 +1327,144 @@
           "This order does not meet your ZeroFree rules (Limit + ≥ 200 shares + price ≥ $1). Commission plus regulatory and locate fees apply.";
       }
 
-      mirrorToRisk({
-        symbol,
-        side,
-        orderType,
-        price,
-        shares,
-        locate: locateFee,
-        totalFees,
-        net,
-        zeroFree: isZeroFree ? "Yes" : "No",
-      });
+      updateRiskSection(notional, totalFees, net, locateFee, side);
     }
 
-    function mirrorToRisk(data) {
-      riskSymbol.textContent = data.symbol || "--";
-      riskSide.textContent = data.side ? data.side.toUpperCase() : "--";
-      riskOrderType.textContent = data.orderType
-        ? data.orderType.toUpperCase()
-        : "--";
-      riskTradePrice.textContent = formatMoney(
-        isFinite(data.price) ? data.price : 0
+    function updateRiskSection(notional, totalFees, net, locateFee, side) {
+      const margin = portfolioValue
+        ? parseMoney(marginAmountEl.textContent)
+        : 0;
+
+      riskSideLabel.textContent = side ? side.toUpperCase() : "--";
+      riskNetUsedEl.textContent = formatMoney(net || 0);
+      riskMarginEl.textContent = formatMoney(margin || 0);
+
+      updateRiskGauge();
+      updateProfitTargets(notional, totalFees, side);
+    }
+
+    // ---------- RISK GAUGE ----------
+    function updateRiskGauge() {
+      const margin = parseMoney(marginAmountEl.textContent);
+      const net = parseMoney(netAmount.textContent);
+
+      let pct = 0;
+      if (margin > 0 && net > 0) {
+        pct = Math.min((net / margin) * 100, 100);
+      }
+
+      // arcs: set full static segments, needle + percent change
+      const gLen = 0.34 * circumference;
+      const yLen = 0.32 * circumference;
+      const rLen = 0.34 * circumference;
+
+      arcGreen.setAttribute(
+        "stroke-dasharray",
+        `${gLen} ${circumference - gLen}`
       );
-      riskShares.textContent = isFinite(data.shares) ? data.shares : 0;
-      riskLocate.textContent = formatMoney(data.locate || 0);
-      riskTotalFees.textContent = formatMoney(data.totalFees || 0);
-      riskNetAmount.textContent = formatMoney(data.net || 0);
-      riskZeroFree.textContent = data.zeroFree || "--";
+      arcYellow.setAttribute(
+        "stroke-dasharray",
+        `${yLen} ${circumference - yLen}`
+      );
+      arcYellow.setAttribute(
+        "stroke-dashoffset",
+        -(gLen)
+      );
+      arcRed.setAttribute(
+        "stroke-dasharray",
+        `${rLen} ${circumference - rLen}`
+      );
+      arcRed.setAttribute(
+        "stroke-dashoffset",
+        -(gLen + yLen)
+      );
+
+      // needle: 0% at top (12 o'clock), rotate clockwise
+      const angle = (pct / 100) * 360;
+      gaugeNeedle.setAttribute(
+        "transform",
+        `rotate(${angle} 110 110)`
+      );
+
+      gaugePercentText.textContent = Math.round(pct) + "%";
+
+      let zone = "green";
+      let statusText = "Acceptable / Controlled Risk";
+      let desc =
+        "Position size is within your defined risk range given your current margin amount.";
+
+      if (pct >= 35 && pct <= 66) {
+        zone = "yellow";
+        statusText = "Elevated / Watch Carefully";
+        desc =
+          "You are using a meaningful portion of available margin. Consider whether this aligns with your risk plan.";
+      } else if (pct > 66) {
+        zone = "red";
+        statusText = "High / Excessive Risk";
+        desc =
+          "Position size is large relative to margin. Strongly consider trimming or reducing exposure.";
+      }
+
+      gaugeStatusText.className = "gauge-status " + zone;
+      gaugeStatusText.textContent = statusText;
+      gaugeDescription.textContent = desc;
     }
 
-    // ---------- LOCAL STORAGE LOGGING + CSV ----------
+    // ---------- PROFIT TARGET TABLE ----------
+    function updateProfitTargets(notional, totalFees, side) {
+      targetsBody.innerHTML = "";
+
+      if (!notional || notional <= 0) {
+        return;
+      }
+
+      const feeDollars = totalFees || 0;
+      const feePctRaw = notional > 0 ? (feeDollars / notional) * 100 : 0;
+      const feePctDisplay = Math.round(feePctRaw * 100) / 100;
+
+      function row(percentRange, dollarRange, isBad) {
+        const tr = document.createElement("tr");
+        const tdP = document.createElement("td");
+        const tdD = document.createElement("td");
+        tdP.textContent = percentRange;
+        tdD.textContent = dollarRange;
+        tdD.className = isBad ? "targets-profit-bad" : "targets-profit-good";
+        tr.appendChild(tdP);
+        tr.appendChild(tdD);
+        targetsBody.appendChild(tr);
+      }
+
+      // Row 1: 0 – fee% (no rounding up of fee%)
+      const low1Pct = 0;
+      const high1Pct = feePctDisplay;
+      const low1Dol = 0;
+      const high1Dol = (high1Pct / 100) * notional;
+
+      row(
+        `${low1Pct.toFixed(2)}% – ${high1Pct.toFixed(2)}%`,
+        `${formatMoney(low1Dol)} – ${formatMoney(high1Dol)}`,
+        true
+      );
+
+      // Subsequent rows: 5% buckets, starting at next multiple of 5 above fee%
+      const baseBucket = Math.ceil(feePctRaw / 5) * 5 || 5;
+      const rowsNeeded = 5;
+
+      let startPct = baseBucket;
+      for (let i = 0; i < rowsNeeded; i++) {
+        const endPct = startPct + 5;
+        const lowDol = (startPct / 100) * notional;
+        const highDol = (endPct / 100) * notional;
+        row(
+          `${startPct.toFixed(0)}% – ${endPct.toFixed(0)}%`,
+          `${formatMoney(lowDol)} – ${formatMoney(highDol)}`,
+          false
+        );
+        startPct = endPct;
+      }
+    }
+
+    // ---------- LOCAL STORAGE ----------
     const LOG_KEY = "tz_trading_control_trades";
 
     function loadTrades() {
@@ -1036,58 +1486,36 @@
       }
     }
 
-    function formatDateTimeForLog() {
-      const now = new Date();
-      const est = toEstDate(now);
-      const status = getMarketStatus(est);
-
-      const month = String(est.getMonth() + 1).padStart(2, "0");
-      const day = String(est.getDate()).padStart(2, "0");
-      const year = est.getFullYear();
-
-      let hours = est.getHours();
-      const minutes = String(est.getMinutes()).padStart(2, "0");
-      const ampm = hours >= 12 ? "PM" : "AM";
-      let displayHour = hours % 12;
-      if (displayHour === 0) displayHour = 12;
-
-      const dateStr = month + "/" + day + "/" + year;
-      const timeStr = displayHour + ":" + minutes + " " + ampm;
-
-      return { dateStr, timeStr, marketStatus: status.status };
-    }
-
-    function appendTradeToTable(trade) {
+    function appendSavedTradeRow(trade) {
       const tr = document.createElement("tr");
 
-      function td(text, alignRight) {
-        const cell = document.createElement("td");
-        cell.style.padding = "3px 6px";
-        cell.style.borderBottom = "1px solid #111827";
-        if (alignRight) cell.style.textAlign = "right";
-        cell.textContent = text;
-        return cell;
+      function cell(text, alignRight) {
+        const td = document.createElement("td");
+        td.textContent = text;
+        if (alignRight) td.style.textAlign = "right";
+        return td;
       }
 
-      tr.appendChild(td(trade.date));
-      tr.appendChild(td(trade.time));
-      tr.appendChild(td(trade.symbol));
-      tr.appendChild(td(trade.side.toUpperCase()));
-      tr.appendChild(td(formatMoney(trade.tradePrice), true));
-      tr.appendChild(td(trade.shares, true));
-      tr.appendChild(td(formatMoney(trade.totalFees), true));
-      tr.appendChild(td(formatMoney(trade.netAmount), true));
+      tr.appendChild(cell(trade.date));
+      tr.appendChild(cell(trade.time));
+      tr.appendChild(cell(trade.symbol));
+      tr.appendChild(cell(trade.side.toUpperCase()));
+      tr.appendChild(cell(trade.orderType.toUpperCase()));
+      tr.appendChild(cell(formatMoney(trade.tradePrice), true));
+      tr.appendChild(cell(trade.shares, true));
+      tr.appendChild(cell(formatMoney(trade.totalFees), true));
+      tr.appendChild(cell(formatMoney(trade.netAmount), true));
 
-      tradeLogBody.appendChild(tr);
+      savedBody.appendChild(tr);
     }
 
-    function renderTradeLog() {
-      tradeLogBody.innerHTML = "";
+    function renderSavedTrades() {
+      savedBody.innerHTML = "";
       const trades = loadTrades();
-      trades.forEach(appendTradeToTable);
+      trades.forEach(appendSavedTradeRow);
     }
 
-    function buildTradePayloadForLog() {
+    function buildTradePayload() {
       const { dateStr, timeStr, marketStatus } = formatDateTimeForLog();
 
       return {
@@ -1100,93 +1528,24 @@
         tradePrice: parseFloat(tradePriceInput.value) || 0,
         shares: parseInt(sharesInput.value, 10) || 0,
         locatePrice: parseFloat(locatePriceInput.value) || 0,
-        commission: parseFloat(
-          feeCommission.textContent.replace("$", "") || "0"
-        ),
-        taf: parseFloat(feeTAF.textContent.replace("$", "") || "0"),
-        nscc: parseFloat(feeNSCC.textContent.replace("$", "") || "0"),
-        totalFees: parseFloat(feeTotal.textContent.replace("$", "") || "0"),
-        netAmount: parseFloat(netAmount.textContent.replace("$", "") || "0"),
+        commission: parseMoney(feeCommission.textContent),
+        taf: parseMoney(feeTAF.textContent),
+        nscc: parseMoney(feeNSCC.textContent),
+        totalFees: parseMoney(feeTotal.textContent),
+        netAmount: parseMoney(netAmount.textContent),
       };
     }
 
-    function logTrade() {
-      const payload = buildTradePayloadForLog();
-
-      if (!payload.symbol || !payload.shares || !payload.tradePrice) {
-        alert("Please enter symbol, trade price, and shares before saving.");
-        return;
-      }
-
-      const trades = loadTrades();
-      trades.push(payload);
-      saveTrades(trades);
-      appendTradeToTable(payload);
-      alert("Trade saved in your browser log.");
-    }
-
-    function tradesToCsv(trades) {
-      if (!trades.length) return "";
-
-      const headers = [
-        "date",
-        "time",
-        "marketStatus",
-        "symbol",
-        "orderType",
-        "side",
-        "tradePrice",
-        "shares",
-        "locatePrice",
-        "commission",
-        "taf",
-        "nscc",
-        "totalFees",
-        "netAmount",
-      ];
-
-      const rows = [
-        headers.join(","),
-        ...trades.map((t) =>
-          headers
-            .map((h) => {
-              let val = t[h] ?? "";
-              if (typeof val === "string") {
-                val = '"' + val.replace(/"/g, '""') + '"';
-              }
-              return val;
-            })
-            .join(",")
-        ),
-      ];
-
-      return rows.join("\n");
-    }
-
-    function exportCsv() {
-      const trades = loadTrades();
-      if (!trades.length) {
-        alert("No trades in log to export.");
-        return;
-      }
-
-      const csv = tradesToCsv(trades);
-      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-
-      const now = new Date();
-      const datePart =
-        now.getFullYear().toString() +
-        String(now.getMonth() + 1).padStart(2, "0") +
-        String(now.getDate()).padStart(2, "0");
-
-      link.download = "trading_control_log_" + datePart + ".csv";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+    // ---------- CLEAR / RESET ----------
+    function clearOrderAndRisk() {
+      symbolInput.value = "";
+      orderTypeSelect.value = "limit";
+      sideSelect.value = "long";
+      tradePriceInput.value = "";
+      sharesInput.value = "";
+      locatePriceInput.value = "";
+      updateLocateVisibility();
+      calculate(); // this will also reset risk section with zero values
     }
 
     // ---------- EVENT LISTENERS ----------
@@ -1201,24 +1560,31 @@
     sharesInput.addEventListener("input", calculate);
     locatePriceInput.addEventListener("input", calculate);
 
-    clearButton.addEventListener("click", () => {
-      symbolInput.value = "";
-      orderTypeSelect.value = "limit";
-      sideSelect.value = "long";
-      tradePriceInput.value = "";
-      sharesInput.value = "";
-      locatePriceInput.value = "";
-      updateLocateVisibility();
-      calculate();
+    executeButton.addEventListener("click", () => {
+      const payload = buildTradePayload();
+
+      if (!payload.symbol || !payload.shares || !payload.tradePrice) {
+        alert("Please enter symbol, trade price, and shares before executing.");
+        return;
+      }
+
+      const trades = loadTrades();
+      trades.push(payload);
+      saveTrades(trades);
+      appendSavedTradeRow(payload);
+
+      clearOrderAndRisk();
+      alert("Trade executed and saved in browser log.");
     });
 
-    logTradeButton.addEventListener("click", logTrade);
-    exportCsvButton.addEventListener("click", exportCsv);
+    cancelButton.addEventListener("click", () => {
+      clearOrderAndRisk();
+    });
 
     // Init
     updateLocateVisibility();
     calculate();
-    renderTradeLog();
+    renderSavedTrades();
   </script>
 </body>
 </html>
