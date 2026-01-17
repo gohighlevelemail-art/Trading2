@@ -411,7 +411,6 @@
       color: #e5e7eb;
     }
 
-    /* Risk panel */
     .risk-grid {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -634,8 +633,11 @@
             <button class="btn btn-ghost" id="clearButton">
               ✖ Clear
             </button>
-            <button class="btn btn-primary" id="submitButton">
-              ⬆ Submit to Google Sheets
+            <button class="btn btn-primary" id="logTradeButton">
+              💾 Save Trade (browser)
+            </button>
+            <button class="btn btn-ghost" id="exportCsvButton">
+              ⬇ Export CSV
             </button>
           </div>
         </div>
@@ -700,6 +702,36 @@
             include stop levels, % risk, and R-multiple targets.
           </div>
         </div>
+
+        <div class="card" style="margin-top: 16px;">
+          <div class="card-title-row">
+            <div class="card-title">Saved Trades (Browser Log)</div>
+            <div class="card-note">
+              Stored in your browser via localStorage. Clear browser data =
+              log lost. Export CSV for backups.
+            </div>
+          </div>
+
+          <div style="max-height: 260px; overflow-y: auto; font-size: 12px;">
+            <table style="width: 100%; border-collapse: collapse;">
+              <thead>
+                <tr>
+                  <th style="text-align:left; padding:4px 6px; border-bottom:1px solid #1f2937;">Date</th>
+                  <th style="text-align:left; padding:4px 6px; border-bottom:1px solid #1f2937;">Time</th>
+                  <th style="text-align:left; padding:4px 6px; border-bottom:1px solid #1f2937;">Symbol</th>
+                  <th style="text-align:left; padding:4px 6px; border-bottom:1px solid #1f2937;">Side</th>
+                  <th style="text-align:right; padding:4px 6px; border-bottom:1px solid #1f2937;">Px</th>
+                  <th style="text-align:right; padding:4px 6px; border-bottom:1px solid #1f2937;">Shares</th>
+                  <th style="text-align:right; padding:4px 6px; border-bottom:1px solid #1f2937;">Fees</th>
+                  <th style="text-align:right; padding:4px 6px; border-bottom:1px solid #1f2937;">Net</th>
+                </tr>
+              </thead>
+              <tbody id="tradeLogBody">
+                <!-- Rows injected by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -712,33 +744,25 @@
     }
 
     function toEstDate(date) {
-      // Convert local time to EST (UTC-5 standard, UTC-4 daylight saving is ignored for simplicity).
-      // A more precise version could use Intl APIs, but this keeps it deterministic.
       const utc = date.getTime() + date.getTimezoneOffset() * 60000;
       const estOffsetHours = -5;
       return new Date(utc + estOffsetHours * 3600000);
     }
 
     function getMarketStatus(estDate) {
-      const day = estDate.getDay(); // 0=Sun
+      const day = estDate.getDay();
       const hours = estDate.getHours();
       const minutes = estDate.getMinutes();
       const totalMinutes = hours * 60 + minutes;
 
-      // Weekend closed
       if (day === 0 || day === 6) {
         return { status: "Market Closed", class: "status-closed" };
       }
 
-      // 4:00–9:00 → Pre-Market
       const preStart = 4 * 60;
       const preEnd = 9 * 60;
-
-      // 9:00–16:00 → Market
       const openStart = 9 * 60;
       const openEnd = 16 * 60;
-
-      // 16:00–20:00 → After Hours
       const afterStart = 16 * 60;
       const afterEnd = 20 * 60;
 
@@ -759,9 +783,9 @@
       const now = new Date();
       const est = toEstDate(now);
 
-      let month = String(est.getMonth() + 1).padStart(2, "0");
-      let day = String(est.getDate()).padStart(2, "0");
-      let year = est.getFullYear();
+      const month = String(est.getMonth() + 1).padStart(2, "0");
+      const day = String(est.getDate()).padStart(2, "0");
+      const year = est.getFullYear();
 
       let hours = est.getHours();
       let minutes = String(est.getMinutes()).padStart(2, "0");
@@ -780,7 +804,6 @@
       pill.className = "status-pill " + status.class;
       text.textContent = status.status;
 
-      // Also reflect into Risk tab current status
       document.getElementById("riskMarketStatus").textContent = status.status;
     }
 
@@ -828,9 +851,9 @@
     const statusMessage = document.getElementById("statusMessage");
 
     const clearButton = document.getElementById("clearButton");
-    const submitButton = document.getElementById("submitButton");
+    const logTradeButton = document.getElementById("logTradeButton");
+    const exportCsvButton = document.getElementById("exportCsvButton");
 
-    // Risk summary fields
     const riskSymbol = document.getElementById("riskSymbol");
     const riskSide = document.getElementById("riskSide");
     const riskOrderType = document.getElementById("riskOrderType");
@@ -840,6 +863,8 @@
     const riskTotalFees = document.getElementById("riskTotalFees");
     const riskNetAmount = document.getElementById("riskNetAmount");
     const riskZeroFree = document.getElementById("riskZeroFree");
+
+    const tradeLogBody = document.getElementById("tradeLogBody");
 
     // ---------- LOGIC ----------
     function updateLocateVisibility() {
@@ -853,8 +878,8 @@
 
     function calculate() {
       const symbol = symbolInput.value.trim().toUpperCase();
-      const orderType = orderTypeSelect.value; // "limit" or "market"
-      const side = sideSelect.value; // "long" or "short"
+      const orderType = orderTypeSelect.value;
+      const side = sideSelect.value;
       const price = parseFloat(tradePriceInput.value);
       const shares = parseInt(sharesInput.value, 10);
       const locate = parseFloat(locatePriceInput.value) || 0;
@@ -892,7 +917,6 @@
         summaryBadge.textContent = "Waiting for input";
         statusMessage.textContent =
           "Enter a positive trade price and share size to evaluate ZeroFree status and fees.";
-        // Mirror to Risk
         mirrorToRisk({
           symbol,
           side,
@@ -907,7 +931,6 @@
         return;
       }
 
-      // Determine ZeroFree
       let isZeroFree = false;
       if (
         orderType === "limit" &&
@@ -917,7 +940,6 @@
         isZeroFree = true;
       }
 
-      // Commission
       let commission = 0;
       if (isZeroFree) {
         commission = 0;
@@ -929,18 +951,14 @@
         }
       }
 
-      // TAF
-      // Your custom rule: base 0.02, but if shares > 100 then 0.005 per 100 shares.
       let taf = 0.02;
       if (shares > 100) {
         taf = Math.ceil(shares / 100) * 0.005;
       }
 
-      // NSCC = 0.00015 * shares, but if less than 0.03, treat as 0.00
       let nscc = shares * 0.00015;
       if (nscc < 0.03) nscc = 0;
 
-      // Locate fee
       const locateFee = side === "short" ? locate : 0;
 
       const totalFees = commission + taf + nscc + locateFee;
@@ -967,7 +985,6 @@
           "This order does not meet your ZeroFree rules (Limit + ≥ 200 shares + price ≥ $1). Commission plus regulatory and locate fees apply.";
       }
 
-      // Mirror to Risk tab
       mirrorToRisk({
         symbol,
         side,
@@ -997,6 +1014,181 @@
       riskZeroFree.textContent = data.zeroFree || "--";
     }
 
+    // ---------- LOCAL STORAGE LOGGING + CSV ----------
+    const LOG_KEY = "tz_trading_control_trades";
+
+    function loadTrades() {
+      try {
+        const raw = localStorage.getItem(LOG_KEY);
+        if (!raw) return [];
+        return JSON.parse(raw) || [];
+      } catch (e) {
+        console.error("Error reading trades from localStorage", e);
+        return [];
+      }
+    }
+
+    function saveTrades(trades) {
+      try {
+        localStorage.setItem(LOG_KEY, JSON.stringify(trades));
+      } catch (e) {
+        console.error("Error saving trades to localStorage", e);
+      }
+    }
+
+    function formatDateTimeForLog() {
+      const now = new Date();
+      const est = toEstDate(now);
+      const status = getMarketStatus(est);
+
+      const month = String(est.getMonth() + 1).padStart(2, "0");
+      const day = String(est.getDate()).padStart(2, "0");
+      const year = est.getFullYear();
+
+      let hours = est.getHours();
+      const minutes = String(est.getMinutes()).padStart(2, "0");
+      const ampm = hours >= 12 ? "PM" : "AM";
+      let displayHour = hours % 12;
+      if (displayHour === 0) displayHour = 12;
+
+      const dateStr = month + "/" + day + "/" + year;
+      const timeStr = displayHour + ":" + minutes + " " + ampm;
+
+      return { dateStr, timeStr, marketStatus: status.status };
+    }
+
+    function appendTradeToTable(trade) {
+      const tr = document.createElement("tr");
+
+      function td(text, alignRight) {
+        const cell = document.createElement("td");
+        cell.style.padding = "3px 6px";
+        cell.style.borderBottom = "1px solid #111827";
+        if (alignRight) cell.style.textAlign = "right";
+        cell.textContent = text;
+        return cell;
+      }
+
+      tr.appendChild(td(trade.date));
+      tr.appendChild(td(trade.time));
+      tr.appendChild(td(trade.symbol));
+      tr.appendChild(td(trade.side.toUpperCase()));
+      tr.appendChild(td(formatMoney(trade.tradePrice), true));
+      tr.appendChild(td(trade.shares, true));
+      tr.appendChild(td(formatMoney(trade.totalFees), true));
+      tr.appendChild(td(formatMoney(trade.netAmount), true));
+
+      tradeLogBody.appendChild(tr);
+    }
+
+    function renderTradeLog() {
+      tradeLogBody.innerHTML = "";
+      const trades = loadTrades();
+      trades.forEach(appendTradeToTable);
+    }
+
+    function buildTradePayloadForLog() {
+      const { dateStr, timeStr, marketStatus } = formatDateTimeForLog();
+
+      return {
+        date: dateStr,
+        time: timeStr,
+        marketStatus,
+        symbol: symbolInput.value.trim().toUpperCase(),
+        orderType: orderTypeSelect.value,
+        side: sideSelect.value,
+        tradePrice: parseFloat(tradePriceInput.value) || 0,
+        shares: parseInt(sharesInput.value, 10) || 0,
+        locatePrice: parseFloat(locatePriceInput.value) || 0,
+        commission: parseFloat(
+          feeCommission.textContent.replace("$", "") || "0"
+        ),
+        taf: parseFloat(feeTAF.textContent.replace("$", "") || "0"),
+        nscc: parseFloat(feeNSCC.textContent.replace("$", "") || "0"),
+        totalFees: parseFloat(feeTotal.textContent.replace("$", "") || "0"),
+        netAmount: parseFloat(netAmount.textContent.replace("$", "") || "0"),
+      };
+    }
+
+    function logTrade() {
+      const payload = buildTradePayloadForLog();
+
+      if (!payload.symbol || !payload.shares || !payload.tradePrice) {
+        alert("Please enter symbol, trade price, and shares before saving.");
+        return;
+      }
+
+      const trades = loadTrades();
+      trades.push(payload);
+      saveTrades(trades);
+      appendTradeToTable(payload);
+      alert("Trade saved in your browser log.");
+    }
+
+    function tradesToCsv(trades) {
+      if (!trades.length) return "";
+
+      const headers = [
+        "date",
+        "time",
+        "marketStatus",
+        "symbol",
+        "orderType",
+        "side",
+        "tradePrice",
+        "shares",
+        "locatePrice",
+        "commission",
+        "taf",
+        "nscc",
+        "totalFees",
+        "netAmount",
+      ];
+
+      const rows = [
+        headers.join(","),
+        ...trades.map((t) =>
+          headers
+            .map((h) => {
+              let val = t[h] ?? "";
+              if (typeof val === "string") {
+                val = '"' + val.replace(/"/g, '""') + '"';
+              }
+              return val;
+            })
+            .join(",")
+        ),
+      ];
+
+      return rows.join("\n");
+    }
+
+    function exportCsv() {
+      const trades = loadTrades();
+      if (!trades.length) {
+        alert("No trades in log to export.");
+        return;
+      }
+
+      const csv = tradesToCsv(trades);
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+
+      const now = new Date();
+      const datePart =
+        now.getFullYear().toString() +
+        String(now.getMonth() + 1).padStart(2, "0") +
+        String(now.getDate()).padStart(2, "0");
+
+      link.download = "trading_control_log_" + datePart + ".csv";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
+
     // ---------- EVENT LISTENERS ----------
     sideSelect.addEventListener("change", () => {
       updateLocateVisibility();
@@ -1020,74 +1212,13 @@
       calculate();
     });
 
-    // ---------- GOOGLE SHEETS SUBMIT ----------
-    submitButton.addEventListener("click", () => {
-      const now = new Date();
-      const est = toEstDate(now);
-      const status = getMarketStatus(est);
-
-      const month = String(est.getMonth() + 1).padStart(2, "0");
-      const day = String(est.getDate()).padStart(2, "0");
-      const year = est.getFullYear();
-
-      let hours = est.getHours();
-      const minutes = String(est.getMinutes()).padStart(2, "0");
-      const ampm = hours >= 12 ? "PM" : "AM";
-      let displayHour = hours % 12;
-      if (displayHour === 0) displayHour = 12;
-
-      const dateStr = month + "/" + day + "/" + year;
-      const timeStr = displayHour + ":" + minutes + " " + ampm;
-
-      const payload = {
-        date: dateStr,
-        time: timeStr,
-        marketStatus: status.status,
-        symbol: symbolInput.value.trim().toUpperCase(),
-        orderType: orderTypeSelect.value,
-        side: sideSelect.value,
-        tradePrice: parseFloat(tradePriceInput.value) || 0,
-        shares: parseInt(sharesInput.value, 10) || 0,
-        locatePrice: parseFloat(locatePriceInput.value) || 0,
-        commission: parseFloat(
-          feeCommission.textContent.replace("$", "") || "0"
-        ),
-        taf: parseFloat(feeTAF.textContent.replace("$", "") || "0"),
-        nscc: parseFloat(feeNSCC.textContent.replace("$", "") || "0"),
-        totalFees: parseFloat(feeTotal.textContent.replace("$", "") || "0"),
-        netAmount: parseFloat(netAmount.textContent.replace("$", "") || "0"),
-      };
-
-      // TODO: Replace this with your Apps Script Web App URL
-      const SHEETS_WEBHOOK_URL = "https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec";
-
-      if (SHEETS_WEBHOOK_URL.includes("YOUR_SCRIPT_ID")) {
-        alert(
-          "Submit clicked.\n\nTo enable logging, replace SHEETS_WEBHOOK_URL in the code with your Google Apps Script web app URL."
-        );
-        return;
-      }
-
-      fetch(SHEETS_WEBHOOK_URL, {
-        method: "POST",
-        mode: "no-cors",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      })
-        .then(() => {
-          alert("Entry submitted to Google Sheets (no-cors mode).");
-        })
-        .catch((err) => {
-          console.error(err);
-          alert("Error submitting to Google Sheets. Check console.");
-        });
-    });
+    logTradeButton.addEventListener("click", logTrade);
+    exportCsvButton.addEventListener("click", exportCsv);
 
     // Init
     updateLocateVisibility();
     calculate();
+    renderTradeLog();
   </script>
 </body>
 </html>
