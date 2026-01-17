@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Trading Control Center</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    :root {
+      --bg: #070b12;
+      --card: #101623;
+      --accent: #3b82f6;
+      --accent-soft: rgba(59, 130, 246, 0.15);
+      --text: #f9fafb;
+      --muted: #9ca3af;
+      --danger: #f97373;
+      --success: #22c55e;
+      --border: #1f2933;
+      --input: #0b111c;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+    }
+
+    body {
+      background: radial-gradient(circle at top, #111827 0, #020617 60%);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 32px 8px;
+    }
+
+    .app-container {
+      width: 100%;
+      max-width: 1100px;
+      background: linear-gradient(145deg, #020617, #020617);
+      border-radius: 16px;
+      border: 1px solid #1f2937;
+      box-shadow: 0 24px 80px rgba(15, 23, 42, 0.9);
+      padding: 20px 24px 28px;
+    }
+
+    .header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .title-block {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .title {
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .subtitle {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .clock-block {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 4px;
+    }
+
+    .clock-line {
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .status-pill {
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .status-pre {
+      background: rgba(245, 158, 11, 0.1);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.4);
+    }
+
+    .status-open {
+      background: rgba(34, 197, 94, 0.12);
+      color: #4ade80;
+      border: 1px solid rgba(34, 197, 94, 0.5);
+    }
+
+    .status-after {
+      background: rgba(96, 165, 250, 0.14);
+      color: #93c5fd;
+      border: 1px solid rgba(96, 165, 250, 0.5);
+    }
+
+    .status-closed {
+      background: rgba(148, 163, 184, 0.06);
+      color: #cbd5f5;
+      border: 1px solid rgba(148, 163, 184, 0.5);
+    }
+
+    .tabs {
+      display: flex;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(55, 65, 81, 0.7);
+      padding: 3px;
+      margin-bottom: 16px;
+      width: fit-content;
+    }
+
+    .tab-button {
+      border: none;
+      padding: 6px 16px;
+      font-size: 13px;
+      cursor: pointer;
+      border-radius: 999px;
+      background: transparent;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: 0.15s ease;
+    }
+
+    .tab-button.active {
+      background: radial-gradient(circle at top left, #2563eb, #1d4ed8);
+      color: #e5f0ff;
+      box-shadow: 0 0 0 1px rgba(191, 219, 254, 0.4),
+        0 6px 14px rgba(37, 99, 235, 0.45);
+    }
+
+    .tab-icon {
+      font-size: 15px;
+    }
+
+    .content {
+      margin-top: 6px;
+    }
+
+    .tab-panel {
+      display: none;
+    }
+
+    .tab-panel.active {
+      display: block;
+    }
+
+    .card {
+      background: radial-gradient(circle at top left, #020617, #020617);
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      padding: 18px 18px 20px;
+      box-shadow: 0 14px 40px rgba(15, 23, 42, 0.6);
+    }
+
+    .card-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .card-note {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px 22px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .field label {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .input,
+    .select {
+      width: 100%;
+      padding: 7px 9px;
+      border-radius: 8px;
+      border: 1px solid #1f2937;
+      background: var(--input);
+      color: var(--text);
+      font-size: 13px;
+      outline: none;
+      transition: 0.12s ease;
+    }
+
+    .input:focus,
+    .select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.45);
+    }
+
+    .input::placeholder {
+      color: #6b7280;
+    }
+
+    .locate-hidden {
+      display: none;
+    }
+
+    .section-divider {
+      border: none;
+      border-top: 1px dashed rgba(55, 65, 81, 0.8);
+      margin: 14px 0 10px;
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 16px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    .summary-item {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .summary-item span {
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    .summary-badge {
+      font-size: 11px;
+      padding: 3px 10px;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      color: #e5e7eb;
+    }
+
+    .summary-badge.free {
+      border-color: rgba(34, 197, 94, 0.7);
+      color: #bbf7d0;
+      background: rgba(22, 163, 74, 0.16);
+    }
+
+    .summary-badge.paid {
+      border-color: rgba(239, 68, 68, 0.7);
+      color: #fecaca;
+      background: rgba(239, 68, 68, 0.16);
+    }
+
+    .fees-card {
+      margin-top: 2px;
+      background: linear-gradient(135deg, #020617, #020617);
+      border-radius: 12px;
+      border: 1px solid #1f2937;
+      padding: 12px 12px 10px;
+      box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.9);
+    }
+
+    .fees-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+
+    .fees-title {
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .fees-body {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .fee-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 3px 0;
+    }
+
+    .fee-name {
+      color: #9ca3af;
+    }
+
+    .fee-value {
+      color: #e5e7eb;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .fee-total {
+      margin-top: 6px;
+      padding-top: 6px;
+      border-top: 1px dashed rgba(75, 85, 99, 0.9);
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .fee-total-label {
+      color: #e5e7eb;
+    }
+
+    .fee-total-value {
+      color: #fbbf24;
+    }
+
+    .net-row {
+      margin-top: 4px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .net-label {
+      color: #e5e7eb;
+    }
+
+    .net-value {
+      color: #93c5fd;
+    }
+
+    .actions-row {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 999px;
+      padding: 7px 14px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: 0.15s ease;
+    }
+
+    .btn-primary {
+      background: radial-gradient(circle at top left, #2563eb, #1d4ed8);
+      color: #e5f0ff;
+      box-shadow: 0 6px 16px rgba(37, 99, 235, 0.65);
+    }
+
+    .btn-primary:hover {
+      filter: brightness(1.05);
+      transform: translateY(-1px);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid rgba(75, 85, 99, 0.9);
+    }
+
+    .btn-ghost:hover {
+      border-color: rgba(148, 163, 184, 1);
+      color: #e5e7eb;
+      transform: translateY(-1px);
+    }
+
+    .status-text {
+      font-size: 12px;
+      margin-top: 6px;
+      color: var(--muted);
+    }
+
+    .status-text span {
+      color: #e5e7eb;
+    }
+
+    /* Risk panel */
+    .risk-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px 18px;
+      font-size: 13px;
+    }
+
+    .risk-item-label {
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .risk-item-value {
+      margin-top: 2px;
+      color: #e5e7eb;
+      font-variant-numeric: tabular-nums;
+    }
+
+    @media (max-width: 768px) {
+      .app-container {
+        padding: 16px 14px 22px;
+      }
+      .header-row {
+        align-items: flex-start;
+      }
+      .clock-block {
+        align-items: flex-start;
+      }
+      .grid-2,
+      .risk-grid {
+        grid-template-columns: 1fr;
+      }
+      .tabs {
+        width: 100%;
+      }
+      .actions-row {
+        justify-content: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <div class="header-row">
+      <div class="title-block">
+        <div class="title">Trading Control Center</div>
+        <div class="subtitle">
+          Fee Structure &amp; Risk Log &bull; TradeZero-style fee model
+        </div>
+      </div>
+      <div class="clock-block">
+        <div class="clock-line" id="clockDisplay">--/--/---- --:-- -- EST</div>
+        <div id="marketStatusPill" class="status-pill status-closed">
+          <span id="marketStatusText">Market Closed</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab-button active" data-tab="fees">
+        <span class="tab-icon">📊</span>
+        Fee Structure
+      </button>
+      <button class="tab-button" data-tab="risk">
+        <span class="tab-icon">🛡️</span>
+        Risk Management
+      </button>
+    </div>
+
+    <div class="content">
+      <!-- FEE STRUCTURE TAB -->
+      <div class="tab-panel active" id="tab-fees">
+        <div class="card">
+          <div class="card-title-row">
+            <div class="card-title">Order Inputs</div>
+            <div class="card-note">
+              Fill in symbol, type, side, price, shares, and locate (if short).
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="field">
+              <label for="symbolInput">Ticker Symbol</label>
+              <input
+                id="symbolInput"
+                class="input"
+                type="text"
+                placeholder="e.g. VERO"
+              />
+            </div>
+
+            <div class="field">
+              <label for="orderType">Order Type</label>
+              <select id="orderType" class="select">
+                <option value="limit">Limit</option>
+                <option value="market">Market</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="side">Side</label>
+              <select id="side" class="select">
+                <option value="long">Long</option>
+                <option value="short">Short</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="tradePrice">
+                Trade Price (per share, USD)
+              </label>
+              <input
+                id="tradePrice"
+                class="input"
+                type="number"
+                step="0.01"
+                min="0"
+                placeholder="e.g. 10.00"
+              />
+            </div>
+
+            <div class="field">
+              <label for="shares">Shares</label>
+              <input
+                id="shares"
+                class="input"
+                type="number"
+                step="1"
+                min="0"
+                placeholder="e.g. 100"
+              />
+            </div>
+
+            <div class="field locate-hidden" id="locateField">
+              <label for="locatePrice">
+                Locate Price (total locate cost for this trade)
+              </label>
+              <input
+                id="locatePrice"
+                class="input"
+                type="number"
+                step="0.01"
+                min="0"
+                placeholder="e.g. 1.12"
+              />
+            </div>
+          </div>
+
+          <hr class="section-divider" />
+
+          <div class="summary-row">
+            <div class="summary-item">
+              Order:
+              <span id="summaryOrder">--</span>
+            </div>
+            <div class="summary-item">
+              Estimated Notional:
+              <span id="summaryNotional">$0.00</span>
+            </div>
+            <div class="summary-item">
+              ZeroFree Status:
+              <span id="summaryZeroFree">--</span>
+            </div>
+            <div>
+              <span id="summaryBadge" class="summary-badge">
+                Waiting for input
+              </span>
+            </div>
+          </div>
+
+          <div class="fees-card">
+            <div class="fees-header">
+              <div class="fees-title">Fee Breakdown</div>
+              <div class="fees-body" style="font-size: 11px;">
+                Uses TradeZero-style commission tiers and approximated
+                regulatory fees.
+              </div>
+            </div>
+            <div class="fees-body" id="feesBody">
+              <div class="fee-row">
+                <div class="fee-name">Commission</div>
+                <div class="fee-value" id="feeCommission">$0.00</div>
+              </div>
+              <div class="fee-row">
+                <div class="fee-name">TAF</div>
+                <div class="fee-value" id="feeTAF">$0.00</div>
+              </div>
+              <div class="fee-row">
+                <div class="fee-name">NSCC</div>
+                <div class="fee-value" id="feeNSCC">$0.00</div>
+              </div>
+              <div class="fee-row">
+                <div class="fee-name">Locate Fee</div>
+                <div class="fee-value" id="feeLocate">$0.00</div>
+              </div>
+
+              <div class="fee-total">
+                <div class="fee-total-label">Total Fees</div>
+                <div class="fee-total-value" id="feeTotal">$0.00</div>
+              </div>
+
+              <div class="net-row">
+                <div class="net-label">Net Amount (entry cost)</div>
+                <div class="net-value" id="netAmount">$0.00</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="status-text">
+            Status:
+            <span id="statusMessage">
+              Waiting for inputs. Fill out price and shares to calculate
+              commissions and fees.
+            </span>
+          </div>
+
+          <div class="actions-row">
+            <button class="btn btn-ghost" id="clearButton">
+              ✖ Clear
+            </button>
+            <button class="btn btn-primary" id="submitButton">
+              ⬆ Submit to Google Sheets
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- RISK MANAGEMENT TAB -->
+      <div class="tab-panel" id="tab-risk">
+        <div class="card">
+          <div class="card-title-row">
+            <div class="card-title">Risk Management Snapshot</div>
+            <div class="card-note">
+              Mirrors current Fee Structure inputs &amp; fee totals for future
+              risk work.
+            </div>
+          </div>
+
+          <div class="risk-grid">
+            <div>
+              <div class="risk-item-label">Symbol</div>
+              <div class="risk-item-value" id="riskSymbol">--</div>
+            </div>
+            <div>
+              <div class="risk-item-label">Side</div>
+              <div class="risk-item-value" id="riskSide">--</div>
+            </div>
+            <div>
+              <div class="risk-item-label">Order Type</div>
+              <div class="risk-item-value" id="riskOrderType">--</div>
+            </div>
+            <div>
+              <div class="risk-item-label">Trade Price</div>
+              <div class="risk-item-value" id="riskTradePrice">$0.00</div>
+            </div>
+            <div>
+              <div class="risk-item-label">Shares</div>
+              <div class="risk-item-value" id="riskShares">0</div>
+            </div>
+            <div>
+              <div class="risk-item-label">Locate Fee</div>
+              <div class="risk-item-value" id="riskLocate">$0.00</div>
+            </div>
+            <div>
+              <div class="risk-item-label">Total Fees</div>
+              <div class="risk-item-value" id="riskTotalFees">$0.00</div>
+            </div>
+            <div>
+              <div class="risk-item-label">Net Amount</div>
+              <div class="risk-item-value" id="riskNetAmount">$0.00</div>
+            </div>
+            <div>
+              <div class="risk-item-label">ZeroFree</div>
+              <div class="risk-item-value" id="riskZeroFree">--</div>
+            </div>
+            <div>
+              <div class="risk-item-label">Market Status</div>
+              <div class="risk-item-value" id="riskMarketStatus">--</div>
+            </div>
+          </div>
+
+          <div class="status-text" style="margin-top: 14px;">
+            This tab is currently informational only. Future additions can
+            include stop levels, % risk, and R-multiple targets.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ---------- UTILITIES ----------
+    function formatMoney(value) {
+      if (!isFinite(value)) return "$0.00";
+      return "$" + value.toFixed(2);
+    }
+
+    function toEstDate(date) {
+      // Convert local time to EST (UTC-5 standard, UTC-4 daylight saving is ignored for simplicity).
+      // A more precise version could use Intl APIs, but this keeps it deterministic.
+      const utc = date.getTime() + date.getTimezoneOffset() * 60000;
+      const estOffsetHours = -5;
+      return new Date(utc + estOffsetHours * 3600000);
+    }
+
+    function getMarketStatus(estDate) {
+      const day = estDate.getDay(); // 0=Sun
+      const hours = estDate.getHours();
+      const minutes = estDate.getMinutes();
+      const totalMinutes = hours * 60 + minutes;
+
+      // Weekend closed
+      if (day === 0 || day === 6) {
+        return { status: "Market Closed", class: "status-closed" };
+      }
+
+      // 4:00–9:00 → Pre-Market
+      const preStart = 4 * 60;
+      const preEnd = 9 * 60;
+
+      // 9:00–16:00 → Market
+      const openStart = 9 * 60;
+      const openEnd = 16 * 60;
+
+      // 16:00–20:00 → After Hours
+      const afterStart = 16 * 60;
+      const afterEnd = 20 * 60;
+
+      if (totalMinutes >= preStart && totalMinutes < preEnd) {
+        return { status: "Pre-Market", class: "status-pre" };
+      }
+      if (totalMinutes >= openStart && totalMinutes < openEnd) {
+        return { status: "Market Hours", class: "status-open" };
+      }
+      if (totalMinutes >= afterStart && totalMinutes < afterEnd) {
+        return { status: "After Market Hours", class: "status-after" };
+      }
+      return { status: "Market Closed", class: "status-closed" };
+    }
+
+    // ---------- CLOCK ----------
+    function updateClock() {
+      const now = new Date();
+      const est = toEstDate(now);
+
+      let month = String(est.getMonth() + 1).padStart(2, "0");
+      let day = String(est.getDate()).padStart(2, "0");
+      let year = est.getFullYear();
+
+      let hours = est.getHours();
+      let minutes = String(est.getMinutes()).padStart(2, "0");
+      let ampm = hours >= 12 ? "PM" : "AM";
+      let displayHour = hours % 12;
+      if (displayHour === 0) displayHour = 12;
+
+      const clockDisplay = document.getElementById("clockDisplay");
+      clockDisplay.textContent =
+        month + "/" + day + "/" + year + " " + displayHour + ":" + minutes + " " + ampm + " EST";
+
+      const status = getMarketStatus(est);
+      const pill = document.getElementById("marketStatusPill");
+      const text = document.getElementById("marketStatusText");
+
+      pill.className = "status-pill " + status.class;
+      text.textContent = status.status;
+
+      // Also reflect into Risk tab current status
+      document.getElementById("riskMarketStatus").textContent = status.status;
+    }
+
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // ---------- TAB SWITCHING ----------
+    const tabButtons = document.querySelectorAll(".tab-button");
+    const tabPanels = {
+      fees: document.getElementById("tab-fees"),
+      risk: document.getElementById("tab-risk"),
+    };
+
+    tabButtons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const tab = btn.getAttribute("data-tab");
+        tabButtons.forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        Object.keys(tabPanels).forEach((key) => {
+          tabPanels[key].classList.toggle("active", key === tab);
+        });
+      });
+    });
+
+    // ---------- ELEMENTS ----------
+    const symbolInput = document.getElementById("symbolInput");
+    const orderTypeSelect = document.getElementById("orderType");
+    const sideSelect = document.getElementById("side");
+    const tradePriceInput = document.getElementById("tradePrice");
+    const sharesInput = document.getElementById("shares");
+    const locateField = document.getElementById("locateField");
+    const locatePriceInput = document.getElementById("locatePrice");
+
+    const summaryOrder = document.getElementById("summaryOrder");
+    const summaryNotional = document.getElementById("summaryNotional");
+    const summaryZeroFree = document.getElementById("summaryZeroFree");
+    const summaryBadge = document.getElementById("summaryBadge");
+
+    const feeCommission = document.getElementById("feeCommission");
+    const feeTAF = document.getElementById("feeTAF");
+    const feeNSCC = document.getElementById("feeNSCC");
+    const feeLocate = document.getElementById("feeLocate");
+    const feeTotal = document.getElementById("feeTotal");
+    const netAmount = document.getElementById("netAmount");
+    const statusMessage = document.getElementById("statusMessage");
+
+    const clearButton = document.getElementById("clearButton");
+    const submitButton = document.getElementById("submitButton");
+
+    // Risk summary fields
+    const riskSymbol = document.getElementById("riskSymbol");
+    const riskSide = document.getElementById("riskSide");
+    const riskOrderType = document.getElementById("riskOrderType");
+    const riskTradePrice = document.getElementById("riskTradePrice");
+    const riskShares = document.getElementById("riskShares");
+    const riskLocate = document.getElementById("riskLocate");
+    const riskTotalFees = document.getElementById("riskTotalFees");
+    const riskNetAmount = document.getElementById("riskNetAmount");
+    const riskZeroFree = document.getElementById("riskZeroFree");
+
+    // ---------- LOGIC ----------
+    function updateLocateVisibility() {
+      if (sideSelect.value === "short") {
+        locateField.classList.remove("locate-hidden");
+      } else {
+        locateField.classList.add("locate-hidden");
+        locatePriceInput.value = "";
+      }
+    }
+
+    function calculate() {
+      const symbol = symbolInput.value.trim().toUpperCase();
+      const orderType = orderTypeSelect.value; // "limit" or "market"
+      const side = sideSelect.value; // "long" or "short"
+      const price = parseFloat(tradePriceInput.value);
+      const shares = parseInt(sharesInput.value, 10);
+      const locate = parseFloat(locatePriceInput.value) || 0;
+
+      if (!symbol && (!shares || !price)) {
+        summaryOrder.textContent = "--";
+      } else {
+        summaryOrder.textContent =
+          (side === "short" ? "Short " : "Long ") +
+          (shares || 0) +
+          " " +
+          (symbol || "SYMBOL") +
+          " @ " +
+          (isFinite(price) ? "$" + price.toFixed(2) : "--") +
+          " (" +
+          (orderType === "limit" ? "Limit" : "Market") +
+          ")";
+      }
+
+      let notional = 0;
+      if (isFinite(price) && isFinite(shares) && shares > 0) {
+        notional = price * shares;
+      }
+      summaryNotional.textContent = formatMoney(notional);
+
+      if (!isFinite(price) || !isFinite(shares) || shares <= 0 || price <= 0) {
+        feeCommission.textContent = "$0.00";
+        feeTAF.textContent = "$0.00";
+        feeNSCC.textContent = "$0.00";
+        feeLocate.textContent = formatMoney(locate);
+        feeTotal.textContent = formatMoney(locate);
+        netAmount.textContent = formatMoney(notional + locate);
+        summaryZeroFree.textContent = "--";
+        summaryBadge.className = "summary-badge";
+        summaryBadge.textContent = "Waiting for input";
+        statusMessage.textContent =
+          "Enter a positive trade price and share size to evaluate ZeroFree status and fees.";
+        // Mirror to Risk
+        mirrorToRisk({
+          symbol,
+          side,
+          orderType,
+          price,
+          shares,
+          locate,
+          totalFees: locate,
+          net: notional + locate,
+          zeroFree: "--",
+        });
+        return;
+      }
+
+      // Determine ZeroFree
+      let isZeroFree = false;
+      if (
+        orderType === "limit" &&
+        shares >= 200 &&
+        price >= 1
+      ) {
+        isZeroFree = true;
+      }
+
+      // Commission
+      let commission = 0;
+      if (isZeroFree) {
+        commission = 0;
+      } else {
+        if (shares < 200) {
+          commission = 0.99;
+        } else {
+          commission = shares * 0.005;
+        }
+      }
+
+      // TAF
+      // Your custom rule: base 0.02, but if shares > 100 then 0.005 per 100 shares.
+      let taf = 0.02;
+      if (shares > 100) {
+        taf = Math.ceil(shares / 100) * 0.005;
+      }
+
+      // NSCC = 0.00015 * shares, but if less than 0.03, treat as 0.00
+      let nscc = shares * 0.00015;
+      if (nscc < 0.03) nscc = 0;
+
+      // Locate fee
+      const locateFee = side === "short" ? locate : 0;
+
+      const totalFees = commission + taf + nscc + locateFee;
+      const net = notional + totalFees;
+
+      feeCommission.textContent = formatMoney(commission);
+      feeTAF.textContent = formatMoney(taf);
+      feeNSCC.textContent = formatMoney(nscc);
+      feeLocate.textContent = formatMoney(locateFee);
+      feeTotal.textContent = formatMoney(totalFees);
+      netAmount.textContent = formatMoney(net);
+
+      summaryZeroFree.textContent = isZeroFree ? "Qualifies (ZeroFree)" : "Paid commission";
+
+      if (isZeroFree) {
+        summaryBadge.className = "summary-badge free";
+        summaryBadge.textContent = "ZeroFree Trade";
+        statusMessage.textContent =
+          "This order meets your ZeroFree conditions: Limit, ≥ 200 shares, price ≥ $1. Commission is $0.00; only regulatory + locate fees apply.";
+      } else {
+        summaryBadge.className = "summary-badge paid";
+        summaryBadge.textContent = "Commission Charged";
+        statusMessage.textContent =
+          "This order does not meet your ZeroFree rules (Limit + ≥ 200 shares + price ≥ $1). Commission plus regulatory and locate fees apply.";
+      }
+
+      // Mirror to Risk tab
+      mirrorToRisk({
+        symbol,
+        side,
+        orderType,
+        price,
+        shares,
+        locate: locateFee,
+        totalFees,
+        net,
+        zeroFree: isZeroFree ? "Yes" : "No",
+      });
+    }
+
+    function mirrorToRisk(data) {
+      riskSymbol.textContent = data.symbol || "--";
+      riskSide.textContent = data.side ? data.side.toUpperCase() : "--";
+      riskOrderType.textContent = data.orderType
+        ? data.orderType.toUpperCase()
+        : "--";
+      riskTradePrice.textContent = formatMoney(
+        isFinite(data.price) ? data.price : 0
+      );
+      riskShares.textContent = isFinite(data.shares) ? data.shares : 0;
+      riskLocate.textContent = formatMoney(data.locate || 0);
+      riskTotalFees.textContent = formatMoney(data.totalFees || 0);
+      riskNetAmount.textContent = formatMoney(data.net || 0);
+      riskZeroFree.textContent = data.zeroFree || "--";
+    }
+
+    // ---------- EVENT LISTENERS ----------
+    sideSelect.addEventListener("change", () => {
+      updateLocateVisibility();
+      calculate();
+    });
+
+    orderTypeSelect.addEventListener("change", calculate);
+    symbolInput.addEventListener("input", calculate);
+    tradePriceInput.addEventListener("input", calculate);
+    sharesInput.addEventListener("input", calculate);
+    locatePriceInput.addEventListener("input", calculate);
+
+    clearButton.addEventListener("click", () => {
+      symbolInput.value = "";
+      orderTypeSelect.value = "limit";
+      sideSelect.value = "long";
+      tradePriceInput.value = "";
+      sharesInput.value = "";
+      locatePriceInput.value = "";
+      updateLocateVisibility();
+      calculate();
+    });
+
+    // ---------- GOOGLE SHEETS SUBMIT ----------
+    submitButton.addEventListener("click", () => {
+      const now = new Date();
+      const est = toEstDate(now);
+      const status = getMarketStatus(est);
+
+      const month = String(est.getMonth() + 1).padStart(2, "0");
+      const day = String(est.getDate()).padStart(2, "0");
+      const year = est.getFullYear();
+
+      let hours = est.getHours();
+      const minutes = String(est.getMinutes()).padStart(2, "0");
+      const ampm = hours >= 12 ? "PM" : "AM";
+      let displayHour = hours % 12;
+      if (displayHour === 0) displayHour = 12;
+
+      const dateStr = month + "/" + day + "/" + year;
+      const timeStr = displayHour + ":" + minutes + " " + ampm;
+
+      const payload = {
+        date: dateStr,
+        time: timeStr,
+        marketStatus: status.status,
+        symbol: symbolInput.value.trim().toUpperCase(),
+        orderType: orderTypeSelect.value,
+        side: sideSelect.value,
+        tradePrice: parseFloat(tradePriceInput.value) || 0,
+        shares: parseInt(sharesInput.value, 10) || 0,
+        locatePrice: parseFloat(locatePriceInput.value) || 0,
+        commission: parseFloat(
+          feeCommission.textContent.replace("$", "") || "0"
+        ),
+        taf: parseFloat(feeTAF.textContent.replace("$", "") || "0"),
+        nscc: parseFloat(feeNSCC.textContent.replace("$", "") || "0"),
+        totalFees: parseFloat(feeTotal.textContent.replace("$", "") || "0"),
+        netAmount: parseFloat(netAmount.textContent.replace("$", "") || "0"),
+      };
+
+      // TODO: Replace this with your Apps Script Web App URL
+      const SHEETS_WEBHOOK_URL = "https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec";
+
+      if (SHEETS_WEBHOOK_URL.includes("YOUR_SCRIPT_ID")) {
+        alert(
+          "Submit clicked.\n\nTo enable logging, replace SHEETS_WEBHOOK_URL in the code with your Google Apps Script web app URL."
+        );
+        return;
+      }
+
+      fetch(SHEETS_WEBHOOK_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      })
+        .then(() => {
+          alert("Entry submitted to Google Sheets (no-cors mode).");
+        })
+        .catch((err) => {
+          console.error(err);
+          alert("Error submitting to Google Sheets. Check console.");
+        });
+    });
+
+    // Init
+    updateLocateVisibility();
+    calculate();
+  </script>
+</body>
+</html>
