@@ -801,6 +801,9 @@
           </div>
 
           <div class="actions-row">
+            <button class="btn btn-primary" id="checkButton">
+              📈 Check Results
+            </button>
             <button class="btn btn-primary" id="executeButton">
               ✅ Execute Trade
             </button>
@@ -829,7 +832,6 @@
                 height="220"
                 viewBox="0 0 220 220"
               >
-                <!-- Background circle -->
                 <circle
                   cx="110"
                   cy="110"
@@ -839,7 +841,6 @@
                   stroke-width="24"
                 ></circle>
 
-                <!-- Green arc 0–34% -->
                 <circle
                   cx="110"
                   cy="110"
@@ -853,7 +854,6 @@
                   id="arcGreen"
                 ></circle>
 
-                <!-- Yellow arc 35–66% -->
                 <circle
                   cx="110"
                   cy="110"
@@ -867,7 +867,6 @@
                   id="arcYellow"
                 ></circle>
 
-                <!-- Red arc 67–100% -->
                 <circle
                   cx="110"
                   cy="110"
@@ -881,7 +880,6 @@
                   id="arcRed"
                 ></circle>
 
-                <!-- Inner hole -->
                 <circle
                   cx="110"
                   cy="110"
@@ -889,7 +887,6 @@
                   fill="#020617"
                 ></circle>
 
-                <!-- Needle -->
                 <line
                   id="gaugeNeedle"
                   x1="110"
@@ -902,10 +899,8 @@
                   transform="rotate(0 110 110)"
                 ></line>
 
-                <!-- Center dot -->
                 <circle cx="110" cy="110" r="4" fill="#e5e7eb"></circle>
 
-                <!-- Percentage text -->
                 <text
                   id="gaugePercentText"
                   x="110"
@@ -959,7 +954,6 @@
                   </tr>
                 </thead>
                 <tbody id="targetsBody">
-                  <!-- Rows injected by JS -->
                 </tbody>
               </table>
             </div>
@@ -994,7 +988,6 @@
                 </tr>
               </thead>
               <tbody id="savedBody">
-                <!-- Rows injected by JS -->
               </tbody>
             </table>
           </div>
@@ -1069,7 +1062,6 @@
       if (totalMinutes >= afterStart && totalMinutes < afterEnd) {
         return 2;
       }
-      // overnight window
       return 2;
     }
 
@@ -1094,13 +1086,13 @@
       return { dateStr, timeStr, marketStatus: status.status, est, status };
     }
 
-    // ---------- CLOCK + PORTFOLIO MARGIN ----------
+    // ---------- CLOCK + PORTFOLIO ----------
     const clockDisplay = document.getElementById("clockDisplay");
     const marketStatusPill = document.getElementById("marketStatusPill");
     const marketStatusText = document.getElementById("marketStatusText");
-    const riskMarketStatus = document.getElementById("riskMarketStatus"); // may be null
     const marginAmountEl = document.getElementById("marginAmount");
     const portfolioInput = document.getElementById("portfolioInput");
+    const riskMarginEl = document.getElementById("riskMargin");
 
     let portfolioValue = 0;
 
@@ -1108,8 +1100,8 @@
       const lev = getCurrentLeverage(est, portfolioValue);
       const marginValue = portfolioValue * lev;
       marginAmountEl.textContent = formatMoney(marginValue);
-      document.getElementById("riskMargin").textContent = formatMoney(marginValue);
-      updateRiskGauge(); // recalc with new margin
+      riskMarginEl.textContent = formatMoney(marginValue);
+      updateRiskGauge();
     }
 
     function updateClock() {
@@ -1151,6 +1143,7 @@
     }
 
     portfolioInput.addEventListener("blur", commitPortfolio);
+
     portfolioInput.addEventListener("keydown", (e) => {
       if (e.key === "Enter") {
         e.preventDefault();
@@ -1200,17 +1193,16 @@
     const netAmount = document.getElementById("netAmount");
     const statusMessage = document.getElementById("statusMessage");
 
+    const checkButton = document.getElementById("checkButton");
     const executeButton = document.getElementById("executeButton");
     const cancelButton = document.getElementById("cancelButton");
 
-    const riskMarginEl = document.getElementById("riskMargin");
     const riskNetUsedEl = document.getElementById("riskNetUsed");
     const riskSideLabel = document.getElementById("riskSideLabel");
     const targetsBody = document.getElementById("targetsBody");
 
     const savedBody = document.getElementById("savedBody");
 
-    // Gauge elements
     const arcGreen = document.getElementById("arcGreen");
     const arcYellow = document.getElementById("arcYellow");
     const arcRed = document.getElementById("arcRed");
@@ -1222,7 +1214,7 @@
     const radius = 80;
     const circumference = 2 * Math.PI * radius;
 
-    // ---------- FEE / ORDER LOGIC ----------
+    // ---------- ORDER / FEES ----------
     function updateLocateVisibility() {
       if (sideSelect.value === "short") {
         locateField.classList.remove("locate-hidden");
@@ -1273,7 +1265,7 @@
         summaryBadge.textContent = "Waiting for input";
         statusMessage.textContent =
           "Enter a positive trade price and share size to evaluate ZeroFree status and fees.";
-        updateRiskSection(notional, locate, 0, 0, side);
+        updateRiskSection(notional, locate, notional + locate, side);
         return;
       }
 
@@ -1327,23 +1319,21 @@
           "This order does not meet your ZeroFree rules (Limit + ≥ 200 shares + price ≥ $1). Commission plus regulatory and locate fees apply.";
       }
 
-      updateRiskSection(notional, totalFees, net, locateFee, side);
+      updateRiskSection(notional, totalFees, net, side);
     }
 
-    function updateRiskSection(notional, totalFees, net, locateFee, side) {
-      const margin = portfolioValue
-        ? parseMoney(marginAmountEl.textContent)
-        : 0;
+    function updateRiskSection(notional, totalFees, net, side) {
+      const margin = parseMoney(marginAmountEl.textContent);
 
       riskSideLabel.textContent = side ? side.toUpperCase() : "--";
       riskNetUsedEl.textContent = formatMoney(net || 0);
       riskMarginEl.textContent = formatMoney(margin || 0);
 
       updateRiskGauge();
-      updateProfitTargets(notional, totalFees, side);
+      updateProfitTargets(notional, totalFees);
     }
 
-    // ---------- RISK GAUGE ----------
+    // ---------- GAUGE ----------
     function updateRiskGauge() {
       const margin = parseMoney(marginAmountEl.textContent);
       const net = parseMoney(netAmount.textContent);
@@ -1353,39 +1343,18 @@
         pct = Math.min((net / margin) * 100, 100);
       }
 
-      // arcs: set full static segments, needle + percent change
       const gLen = 0.34 * circumference;
       const yLen = 0.32 * circumference;
       const rLen = 0.34 * circumference;
 
-      arcGreen.setAttribute(
-        "stroke-dasharray",
-        `${gLen} ${circumference - gLen}`
-      );
-      arcYellow.setAttribute(
-        "stroke-dasharray",
-        `${yLen} ${circumference - yLen}`
-      );
-      arcYellow.setAttribute(
-        "stroke-dashoffset",
-        -(gLen)
-      );
-      arcRed.setAttribute(
-        "stroke-dasharray",
-        `${rLen} ${circumference - rLen}`
-      );
-      arcRed.setAttribute(
-        "stroke-dashoffset",
-        -(gLen + yLen)
-      );
+      arcGreen.setAttribute("stroke-dasharray", `${gLen} ${circumference - gLen}`);
+      arcYellow.setAttribute("stroke-dasharray", `${yLen} ${circumference - yLen}`);
+      arcYellow.setAttribute("stroke-dashoffset", -gLen);
+      arcRed.setAttribute("stroke-dasharray", `${rLen} ${circumference - rLen}`);
+      arcRed.setAttribute("stroke-dashoffset", -(gLen + yLen));
 
-      // needle: 0% at top (12 o'clock), rotate clockwise
       const angle = (pct / 100) * 360;
-      gaugeNeedle.setAttribute(
-        "transform",
-        `rotate(${angle} 110 110)`
-      );
-
+      gaugeNeedle.setAttribute("transform", `rotate(${angle} 110 110)`);
       gaugePercentText.textContent = Math.round(pct) + "%";
 
       let zone = "green";
@@ -1410,8 +1379,8 @@
       gaugeDescription.textContent = desc;
     }
 
-    // ---------- PROFIT TARGET TABLE ----------
-    function updateProfitTargets(notional, totalFees, side) {
+    // ---------- PROFIT TARGETS ----------
+    function updateProfitTargets(notional, totalFees) {
       targetsBody.innerHTML = "";
 
       if (!notional || notional <= 0) {
@@ -1434,7 +1403,6 @@
         targetsBody.appendChild(tr);
       }
 
-      // Row 1: 0 – fee% (no rounding up of fee%)
       const low1Pct = 0;
       const high1Pct = feePctDisplay;
       const low1Dol = 0;
@@ -1446,7 +1414,6 @@
         true
       );
 
-      // Subsequent rows: 5% buckets, starting at next multiple of 5 above fee%
       const baseBucket = Math.ceil(feePctRaw / 5) * 5 || 5;
       const rowsNeeded = 5;
 
@@ -1536,7 +1503,7 @@
       };
     }
 
-    // ---------- CLEAR / RESET ----------
+    // ---------- CLEAR ----------
     function clearOrderAndRisk() {
       symbolInput.value = "";
       orderTypeSelect.value = "limit";
@@ -1545,10 +1512,10 @@
       sharesInput.value = "";
       locatePriceInput.value = "";
       updateLocateVisibility();
-      calculate(); // this will also reset risk section with zero values
+      calculate();
     }
 
-    // ---------- EVENT LISTENERS ----------
+    // ---------- EVENTS ----------
     sideSelect.addEventListener("change", () => {
       updateLocateVisibility();
       calculate();
@@ -1560,7 +1527,14 @@
     sharesInput.addEventListener("input", calculate);
     locatePriceInput.addEventListener("input", calculate);
 
+    checkButton.addEventListener("click", () => {
+      calculate();
+      alert("Results updated. Review fees and risk before executing.");
+    });
+
     executeButton.addEventListener("click", () => {
+      calculate(); // ensure up to date
+
       const payload = buildTradePayload();
 
       if (!payload.symbol || !payload.shares || !payload.tradePrice) {
